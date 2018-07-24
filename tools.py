@@ -253,31 +253,18 @@ def norm_trajectory(hand_pos, arm_pos):
 # return an numpy array with zero-crossing points for a given 1d array
 def zero_crossing(data):
 	zero_crossing = []
-	rejected = []
+	# rejected = []
 	n = len(data)
 
 	for i in range(0, n-1):
 		if((data[i]>=0.00 and data[i+1]<=0.00) or (data[i]<=0.00 and data[i+1]>=0.00)):
 			if(abs(data[i]) < abs(data[i+1])):
 				zero_crossing.append(i)
-				rejected.append(abs(data[i+1]))
+				# rejected.append(abs(data[i+1]))
 			else:
 				zero_crossing.append(i+1)
-				rejected.append(abs(data[i]))
+				# rejected.append(abs(data[i]))
 
-	thr = max(rejected)
-	# print("threshold-")
-	# print(thr)
-	# print(len(zero_crossing))
-	# extr = []
-	# for i in range(0, n-1):
-	# 	if(data[i]>=-thr and data[i]<=thr):
-	# 		zero_crossing.append(i)
-	# print(len(zero_crossing))
-
-	# zero_crossing = np.sort(np.array(zero_crossing))
-	# print("thr=", thr)
-	# print(thr)
 	zero_crossing = np.array(zero_crossing)
 	return zero_crossing
 
@@ -296,24 +283,13 @@ def zero_crossing1(data):
 				rejected.append(abs(data[i]))
 
 	thr = max(rejected)
-	# print("threshold-")
-	# print(thr)
-	# print(len(zero_crossing))
-	# extr = []
-	# for i in range(0, n-1):
-	# 	if(data[i]>=-thr and data[i]<=thr):
-	# 		zero_crossing.append(i)
-	# print(len(zero_crossing))
-
-	# zero_crossing = np.sort(np.array(zero_crossing))
-	# print("thr=", thr)
-	# print(thr)
 	zero_crossing = np.array(zero_crossing)
 	return zero_crossing, thr
 
 def interesting_points(data):
 	zero, thr = zero_crossing1(data)
-	print(len(zero))
+	# print(len(zero))
+	# print(zero)
 	d1 = hand_acceleration(data)
 	zero1, tr = zero_crossing1(d1)
 	n = len(zero1)
@@ -322,9 +298,10 @@ def interesting_points(data):
 			zero = np.append(zero,zero1[i] )
 
 	zero = np.sort(zero)
-	print("all points")
+	# print("all points")
+	# # print(zero)
+	# print(len(zero))
 	# print(zero)
-	print(len(zero))
 	return zero
 
 # check if the hand are in rest pose based on their location
@@ -452,30 +429,32 @@ def plot_hand_location(start_frame, end_frame, data, mlist):
 	fig = plt.figure("HandsLocation-{}-{}".format(start_frame, end_frame), figsize=(10.5,7))
 	fig.suptitle("Hands location for sign between {} and {} frame".format(start_frame, end_frame))	
 	
-	# plt.subplot(2, 1, 1)
+	plt.subplot(2, 1, 1)
 	plt.plot(x,r_loc[:,[1]], 'r', label='Right hand') 
 	plt.plot(x,l_loc[:,[1]], 'g', label='Left hand') 
-	plt.plot(x[rp],r_loc[:,[1]][rp], 'bo', label='Rest pose') 
+	if(len(rp)>0):
+		plt.plot(x[rp],r_loc[:,[1]][rp], 'bo', label='Rest pose') 
 	plt.grid(True)
 	plt.xlabel("Frames")	
 	plt.ylabel("Regions")
 
-	# plt.subplot(2, 2, 3)
-	# plt.title("R-hand location changes: {}".format(c1))
-	# plt.hist(r_loc[:,[1]], bins=range(15), facecolor='r', align="left")
-	# plt.xticks(np.arange(1, 16, step=1)) 
-	# plt.ylabel("Number of Frames")	
-	# plt.xlabel("Regions")
+	plt.subplot(2, 2, 3)
+	plt.title("R-hand location changes: {}".format(c1))
+	plt.hist(r_loc[:,[1]], bins=range(15), facecolor='r', align="left")
+	plt.xticks(np.arange(1, 16, step=1)) 
+	plt.ylabel("Number of Frames")	
+	plt.xlabel("Regions")
 
-	# plt.subplot(2, 2, 4)
-	# plt.title("L-hand location changes: {}".format(c2))
-	# plt.hist(l_loc[:,[1]], bins=range(15),  facecolor='g', align="left") 
-	# plt.xticks(np.arange(1, 16, step=1)) 
-	# plt.ylabel("Number of Frames")	
-	# plt.xlabel("Regions")
+	plt.subplot(2, 2, 4)
+	plt.title("L-hand location changes: {}".format(c2))
+	plt.hist(l_loc[:,[1]], bins=range(15),  facecolor='g', align="left") 
+	plt.xticks(np.arange(1, 16, step=1)) 
+	plt.ylabel("Number of Frames")	
+	plt.xlabel("Regions")
 	
 	legend = fig.legend(loc='upper right')
-	plt.show()
+	# plt.show()
+
 # compute hand velocity for the 3 axes
 # returns the velocity for the 3 axes and the normilized velocity
 def hand_velocity(start_frame, end_frame, data, mlist, h='R'):
@@ -681,7 +660,7 @@ def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
 				if(is_rest_pose(labels[i][0]+start_frame, data, mlist) == 1 ):
 					labels[i][2] = 1
 				else:
-					labels[i][2] = -15
+					labels[i][2] = -1
 			else:
 				labels[i][2] = -1
 		# elif(is_rest_pose(labels[i+1][0]+start_frame, data, mlist) == 1 ):
@@ -697,7 +676,7 @@ def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
 			else:
 				labels[i][2] = -1
 		else:
-			labels[i][2] = -5
+			labels[i][2] = -1
 		
 		# print(labels[i][0]+start_frame, labels[i][1:])
 		i = i+1
@@ -706,7 +685,7 @@ def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
 # loops through array of labels
 # returns two arrays 
 # 	- 1st with frames for start (where the rest pose is left) and end (where the rest pose is entered)
-#	- 2nd with frames for start and end for the actual sign 
+#	- 2nd with frames for potential start and end for the actual sign 
 def get_signs_borders(labels, start_frame, end_frame):
 	start=0
 	end=0
@@ -718,12 +697,12 @@ def get_signs_borders(labels, start_frame, end_frame):
 	n = len(labels)
 	signs2 = []
 
-	while(i < n-1):
+	while(i < n - 1):
 		if(labels[i][2] == 1 ):
 			start = i
-			i=i+1
-			s = i+1
-			while(i<n-1):
+			i = i + 1
+			s = i + 1
+			while(i < n - 1):
 				if(labels[i][2] == 0 ):
 					break
 				if(labels[i][2] == 1 ):
@@ -767,6 +746,8 @@ def segment_signs(start_frame, end_frame, data, mlist, fps, threshold):
 
 def get_real_signs(vel, labels, start_frame, end_frame):
 	n = len(labels)
+	start = start_frame
+	end = end_frame
 	###
 	## maybe i should check also for vel[start_frame and end_frame]
 	###
@@ -775,7 +756,7 @@ def get_real_signs(vel, labels, start_frame, end_frame):
 			labels[i][2] = 0 #max
 		if(vel[labels[i-1][0]] > vel[labels[i][0]] and vel[labels[i][0]] < vel[labels[i+1][0]]):
 			labels[i][2] = 1 #min
-	print(labels)
+	# print(labels)
 	
 	for i in range(1,n-1):
 		if(labels[i][2] == 1):
@@ -815,31 +796,6 @@ def get_segmented_data(start_frame, end_frame, data, mlist, fps,order=0 ):
 	s_d = np.delete(s_d, np.s_[n_sum:], 0)
 	# print(np.shape(s_d))
 	return s_d
-
-
-
-
-# don't know yet !
-def plotSpectrum(y,Fs):
-	"""
-	Plots a Single-Sided Amplitude Spectrum of y(t)
-	"""
-	n = len(y) # length of the signal
-	k = np.arange(n)
-	T = n/Fs
-	frq = k/T # two sides frequency range
-	#frq = frq[range(n/2.0)] # one side frequency range
-
-	Y = np.fft.fft(y)/n # fft computing and normalization
-	#Y = Y[range(n/2)]
-
-	plt.plot(frq,abs(Y),'r') # plotting the spectrum
-	plt.xlabel('Freq (Hz)')
-	plt.ylabel('|Y(freq)|')
-	plt.show()
-
-
-
 
 
 
