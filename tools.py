@@ -8,17 +8,12 @@ import os
 import sys
 import c3d
 sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
-# import mocap_tools
 import vector_math as vm
 from scipy.signal import argrelextrema
 import scipy.signal as signal
 
-#dictionary_path = ''
-# filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-#mlist_filename = 'marker_list_v0.txt'
 
-
-# not used yet
+#  
 def marker_list_read(filename):
 	m_list = []
 	with open(filename, 'r') as w:
@@ -482,132 +477,6 @@ def hand_acceleration(velocity):
 
 	return acc
 
-#not finished
-def wrist_orientation_frame(frame, data, mlist, h='R'):
-	if(h == 'L'):
-		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]
-		LIWR = data[frame, marker_index(mlist, 'LIWR'), :]
-		wr_vector = (LIWR - LOWR)
-
-		LOHAND = data[frame, marker_index(mlist, 'LOHAND'), :]
-		LIHAND = data[frame, marker_index(mlist, 'LIHAND'), :]
-		mid_hand = (LOHAND + LIHAND)/2
-		mid_wr = (LOWR + LIWR)/2
-		palm_vector = ( mid_hand - mid_wr)
-
-	else:
-		ROWR = data[frame, marker_index(mlist, 'ROWR'), :]
-		RIWR = data[frame, marker_index(mlist, 'RIWR'), :]
-		wr_vector = (RIWR - ROWR)
-
-		ROHAND = data[frame, marker_index(mlist, 'ROHAND'), :]
-		RIHAND = data[frame, marker_index(mlist, 'RIHAND'), :]
-		mid_hand = (ROHAND + RIHAND)/2
-		mid_wr = (ROWR + RIWR)/2
-		palm_vector = (mid_hand - mid_wr )
-
-	# print(wr_vector)
-	# print(palm_vector)
-	print(vm.angle(wr_vector, palm_vector))
-
-#not finished
-def finger_orientation_frame(frame, data, mlist, h='R'):
-	if(h == 'L'):
-		thb0_v = data[frame, marker_index(mlist, 'LTHB1'), :] - data[frame, marker_index(mlist, 'LTHB0'), :]
-		thb1_v = data[frame, marker_index(mlist, 'LTHB2'), :] - data[frame, marker_index(mlist, 'LTHB1'), :]
-
-		idx0_v = data[frame, marker_index(mlist, 'LIDX2'), :] - data[frame, marker_index(mlist, 'LIDX1'), :]
-		idx1_v = data[frame, marker_index(mlist, 'LIDX3'), :] - data[frame, marker_index(mlist, 'LIDX2'), :]
-
-		md0_v = data[frame, marker_index(mlist, 'LMD2'), :] - data[frame, marker_index(mlist, 'LMD1'), :]
-		md1_v = data[frame, marker_index(mlist, 'LMD3'), :] - data[frame, marker_index(mlist, 'LMD2'), :]
-
-		rng0_v = data[frame, marker_index(mlist, 'LRNG2'), :] - data[frame, marker_index(mlist, 'LRNG1'), :]
-		rng1_v = data[frame, marker_index(mlist, 'LRNG3'), :] - data[frame, marker_index(mlist, 'LRNG2'), :]
-
-		ltl0_v = data[frame, marker_index(mlist, 'LTL2'), :] - data[frame, marker_index(mlist, 'LTL1'), :]
-		ltl1_v = data[frame, marker_index(mlist, 'LTL3'), :] - data[frame, marker_index(mlist, 'LTL2'), :]
-
-		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]
-		LIWR = data[frame, marker_index(mlist, 'LIWR'), :]
-		# wr_vector = (LIWR - LOWR)
-
-		LOHAND = data[frame, marker_index(mlist, 'LOHAND'), :]
-		LIHAND = data[frame, marker_index(mlist, 'LIHAND'), :]
-		mid_hand = (LOHAND + LIHAND)/2
-		mid_wr = (LOWR + LIWR)/2
-		palm_vector = ( mid_hand - mid_wr)
-
-	else:
-		thb0_v = data[frame, marker_index(mlist, 'RTHB1'), :] - data[frame, marker_index(mlist, 'RTHB0'), :]
-		thb1_v = data[frame, marker_index(mlist, 'RTHB2'), :] - data[frame, marker_index(mlist, 'RTHB1'), :]
-
-		idx0_v = data[frame, marker_index(mlist, 'RIDX2'), :] - data[frame, marker_index(mlist, 'RIDX1'), :]
-		idx1_v = data[frame, marker_index(mlist, 'RIDX3'), :] - data[frame, marker_index(mlist, 'RIDX2'), :]
-
-		md0_v = data[frame, marker_index(mlist, 'RMD2'), :] - data[frame, marker_index(mlist, 'RMD1'), :]
-		md1_v = data[frame, marker_index(mlist, 'RMD3'), :] - data[frame, marker_index(mlist, 'RMD2'), :]
-
-		rng0_v = data[frame, marker_index(mlist, 'RRNG2'), :] - data[frame, marker_index(mlist, 'RRNG1'), :]
-		rng1_v = data[frame, marker_index(mlist, 'RRNG3'), :] - data[frame, marker_index(mlist, 'RRNG2'), :]
-
-		ltl0_v = data[frame, marker_index(mlist, 'RTL2'), :] - data[frame, marker_index(mlist, 'RTL1'), :]
-		ltl1_v = data[frame, marker_index(mlist, 'RTL3'), :] - data[frame, marker_index(mlist, 'RTL2'), :]
-
-		ROWR = data[frame, marker_index(mlist, 'ROWR'), :]
-		RIWR = data[frame, marker_index(mlist, 'RIWR'), :]
-		# wr_vector = (ROWR - RIWR)
-
-		ROHAND = data[frame, marker_index(mlist, 'ROHAND'), :]
-		RIHAND = data[frame, marker_index(mlist, 'RIHAND'), :]
-		mid_hand = (ROHAND + RIHAND)/2
-		mid_wr = (ROWR + RIWR)/2
-		palm_vector = (mid_hand - mid_wr )
-
-#not finished
-def palm_orientation_frame(frame, data, mlist, h='R'):
-	if(h == 'L'):
-		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]
-		LIWR = data[frame, marker_index(mlist, 'LIWR'), :]
-		
-		LOHAND = data[frame, marker_index(mlist, 'LOHAND'), :]
-		LIHAND = data[frame, marker_index(mlist, 'LIHAND'), :]
-		
-		p = LOHAND - LIHAND
-		q = LOWR - LIHAND
-
-	else:
-		ROWR = data[frame, marker_index(mlist, 'ROWR'), :]
-		# print("ROWR: {}".format(ROWR))
-		RIWR = data[frame, marker_index(mlist, 'RIWR'), :]
-		
-		ROHAND = data[frame, marker_index(mlist, 'ROHAND'), :]
-		RIHAND = data[frame, marker_index(mlist, 'RIHAND'), :]
-		
-		p = ROHAND - RIHAND
-		q = ROWR - RIHAND
-	
-	palm_plane = vm.crossproduct(p,q)
-
-	RFWT = data[frame, marker_index(mlist, 'RFWT'), :]
-	LFWT = data[frame, marker_index(mlist, 'LFWT'), :]
-	STRN = data[frame, marker_index(mlist, 'STRN'), :]
-	RBWT = data[frame, marker_index(mlist, 'RBWT'), :]
-
-	a = RFWT - LFWT
-	b = STRN - LFWT
-	c = RBWT - LFWT
-
-	body_plane = vm.crossproduct(a,b)
-	floor_plane = vm.crossproduct(a,c)
-
-	print("palm_plane={}".format(palm_plane))
-	print("body_plane={}".format(body_plane))
-	print("floor_plane={}".format(floor_plane))
-
-	print("< palm, body: {} ".format(vm.angle(palm_plane,body_plane)))
-	print("< palm, floor: {} ".format(vm.angle(palm_plane,floor_plane)))
-
 # coefficients for Buterworth filter
 def butter_coef(cutoff, fs, order=5):
 	nyq = 0.5*fs
@@ -834,3 +703,129 @@ def plot_velocity(start_frame, end_frame, vel, acc, signs, threshold):
 	
 	# plt.hist(r_vel, bins='auto') 
 	plt.show()
+
+	#not finished
+def wrist_orientation_frame(frame, data, mlist, h='R'):
+	if(h == 'L'):
+		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]
+		LIWR = data[frame, marker_index(mlist, 'LIWR'), :]
+		wr_vector = (LIWR - LOWR)
+
+		LOHAND = data[frame, marker_index(mlist, 'LOHAND'), :]
+		LIHAND = data[frame, marker_index(mlist, 'LIHAND'), :]
+		mid_hand = (LOHAND + LIHAND)/2
+		mid_wr = (LOWR + LIWR)/2
+		palm_vector = ( mid_hand - mid_wr)
+
+	else:
+		ROWR = data[frame, marker_index(mlist, 'ROWR'), :]
+		RIWR = data[frame, marker_index(mlist, 'RIWR'), :]
+		wr_vector = (RIWR - ROWR)
+
+		ROHAND = data[frame, marker_index(mlist, 'ROHAND'), :]
+		RIHAND = data[frame, marker_index(mlist, 'RIHAND'), :]
+		mid_hand = (ROHAND + RIHAND)/2
+		mid_wr = (ROWR + RIWR)/2
+		palm_vector = (mid_hand - mid_wr )
+
+	# print(wr_vector)
+	# print(palm_vector)
+	print(vm.angle(wr_vector, palm_vector))
+
+#not finished
+def finger_orientation_frame(frame, data, mlist, h='R'):
+	if(h == 'L'):
+		thb0_v = data[frame, marker_index(mlist, 'LTHB1'), :] - data[frame, marker_index(mlist, 'LTHB0'), :]
+		thb1_v = data[frame, marker_index(mlist, 'LTHB2'), :] - data[frame, marker_index(mlist, 'LTHB1'), :]
+
+		idx0_v = data[frame, marker_index(mlist, 'LIDX2'), :] - data[frame, marker_index(mlist, 'LIDX1'), :]
+		idx1_v = data[frame, marker_index(mlist, 'LIDX3'), :] - data[frame, marker_index(mlist, 'LIDX2'), :]
+
+		md0_v = data[frame, marker_index(mlist, 'LMD2'), :] - data[frame, marker_index(mlist, 'LMD1'), :]
+		md1_v = data[frame, marker_index(mlist, 'LMD3'), :] - data[frame, marker_index(mlist, 'LMD2'), :]
+
+		rng0_v = data[frame, marker_index(mlist, 'LRNG2'), :] - data[frame, marker_index(mlist, 'LRNG1'), :]
+		rng1_v = data[frame, marker_index(mlist, 'LRNG3'), :] - data[frame, marker_index(mlist, 'LRNG2'), :]
+
+		ltl0_v = data[frame, marker_index(mlist, 'LTL2'), :] - data[frame, marker_index(mlist, 'LTL1'), :]
+		ltl1_v = data[frame, marker_index(mlist, 'LTL3'), :] - data[frame, marker_index(mlist, 'LTL2'), :]
+
+		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]
+		LIWR = data[frame, marker_index(mlist, 'LIWR'), :]
+		# wr_vector = (LIWR - LOWR)
+
+		LOHAND = data[frame, marker_index(mlist, 'LOHAND'), :]
+		LIHAND = data[frame, marker_index(mlist, 'LIHAND'), :]
+		mid_hand = (LOHAND + LIHAND)/2
+		mid_wr = (LOWR + LIWR)/2
+		palm_vector = ( mid_hand - mid_wr)
+
+	else:
+		thb0_v = data[frame, marker_index(mlist, 'RTHB1'), :] - data[frame, marker_index(mlist, 'RTHB0'), :]
+		thb1_v = data[frame, marker_index(mlist, 'RTHB2'), :] - data[frame, marker_index(mlist, 'RTHB1'), :]
+
+		idx0_v = data[frame, marker_index(mlist, 'RIDX2'), :] - data[frame, marker_index(mlist, 'RIDX1'), :]
+		idx1_v = data[frame, marker_index(mlist, 'RIDX3'), :] - data[frame, marker_index(mlist, 'RIDX2'), :]
+
+		md0_v = data[frame, marker_index(mlist, 'RMD2'), :] - data[frame, marker_index(mlist, 'RMD1'), :]
+		md1_v = data[frame, marker_index(mlist, 'RMD3'), :] - data[frame, marker_index(mlist, 'RMD2'), :]
+
+		rng0_v = data[frame, marker_index(mlist, 'RRNG2'), :] - data[frame, marker_index(mlist, 'RRNG1'), :]
+		rng1_v = data[frame, marker_index(mlist, 'RRNG3'), :] - data[frame, marker_index(mlist, 'RRNG2'), :]
+
+		ltl0_v = data[frame, marker_index(mlist, 'RTL2'), :] - data[frame, marker_index(mlist, 'RTL1'), :]
+		ltl1_v = data[frame, marker_index(mlist, 'RTL3'), :] - data[frame, marker_index(mlist, 'RTL2'), :]
+
+		ROWR = data[frame, marker_index(mlist, 'ROWR'), :]
+		RIWR = data[frame, marker_index(mlist, 'RIWR'), :]
+		# wr_vector = (ROWR - RIWR)
+
+		ROHAND = data[frame, marker_index(mlist, 'ROHAND'), :]
+		RIHAND = data[frame, marker_index(mlist, 'RIHAND'), :]
+		mid_hand = (ROHAND + RIHAND)/2
+		mid_wr = (ROWR + RIWR)/2
+		palm_vector = (mid_hand - mid_wr )
+
+#not finished
+def palm_orientation_frame(frame, data, mlist, h='R'):
+	if(h == 'L'):
+		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]
+		LIWR = data[frame, marker_index(mlist, 'LIWR'), :]
+		
+		LOHAND = data[frame, marker_index(mlist, 'LOHAND'), :]
+		LIHAND = data[frame, marker_index(mlist, 'LIHAND'), :]
+		
+		p = LOHAND - LIHAND
+		q = LOWR - LIHAND
+
+	else:
+		ROWR = data[frame, marker_index(mlist, 'ROWR'), :]
+		# print("ROWR: {}".format(ROWR))
+		RIWR = data[frame, marker_index(mlist, 'RIWR'), :]
+		
+		ROHAND = data[frame, marker_index(mlist, 'ROHAND'), :]
+		RIHAND = data[frame, marker_index(mlist, 'RIHAND'), :]
+		
+		p = ROHAND - RIHAND
+		q = ROWR - RIHAND
+	
+	palm_plane = vm.crossproduct(p,q)
+
+	RFWT = data[frame, marker_index(mlist, 'RFWT'), :]
+	LFWT = data[frame, marker_index(mlist, 'LFWT'), :]
+	STRN = data[frame, marker_index(mlist, 'STRN'), :]
+	RBWT = data[frame, marker_index(mlist, 'RBWT'), :]
+
+	a = RFWT - LFWT
+	b = STRN - LFWT
+	c = RBWT - LFWT
+
+	body_plane = vm.crossproduct(a,b)
+	floor_plane = vm.crossproduct(a,c)
+
+	print("palm_plane={}".format(palm_plane))
+	print("body_plane={}".format(body_plane))
+	print("floor_plane={}".format(floor_plane))
+
+	print("< palm, body: {} ".format(vm.angle(palm_plane,body_plane)))
+	print("< palm, floor: {} ".format(vm.angle(palm_plane,floor_plane)))
