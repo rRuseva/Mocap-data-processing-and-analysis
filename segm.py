@@ -48,6 +48,16 @@ if __name__ == "__main__":
 
 	data, marker_list, fps = t.read_frames(filename)
 	
+	diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, right_dominant, one_hand = t.hand_displacment(start_frame, end_frame, new_data, marker_list)
+		
+	hand='R'
+	if(right_dominant == 1):
+		print("- more active hand is: Right \n")
+
+	else:
+		print("- more active hand is: Left hand \n")
+		hand='L'
+
 	###
 	#
 	# change origin point to be between the hip's markers // True is to find the relative coordinates
@@ -61,7 +71,7 @@ if __name__ == "__main__":
 	# compute velocity based on original trajectory 
 	# returns - 3 chanel (x,y,z) velocity and normilized velocity
 	###	
-	r_velocity, r_vel = t.hand_velocity(start_frame, end_frame, new_data, marker_list, 'R')
+	r_velocity, r_vel = t.hand_velocity(start_frame, end_frame, new_data, marker_list, hand)
 	# compute the median value vor velocity used as threshold for later analysis and segmentation
 	median = np.median(r_vel)
 
@@ -88,11 +98,11 @@ if __name__ == "__main__":
 		en = signs[i+1][0] 
 		n = en-st
 
-		vel, vel_norm = t.hand_velocity(st+start_frame,en+start_frame,new_data, marker_list,'R')
+		vel, vel_norm = t.hand_velocity(st+start_frame,en+start_frame,new_data, marker_list, hand)
 		rest_pose_vel[st:en] = vel_norm
 
 	tr = np.amax(rest_pose_vel)
-	print("threshold=", tr)
+	print("threshold = ", tr)
 
 	# refined starts and ends of the signs 
 	labels2 = t.segm(r_vel, r_acc_filt, start_frame, end_frame, new_data, marker_list, tr)
