@@ -48,25 +48,32 @@ if __name__ == "__main__":
 
 	data, marker_list, fps = t.read_frames(filename)
 	
-	diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, right_dominant, one_hand = t.hand_displacment(start_frame, end_frame, new_data, marker_list)
-		
-	hand='R'
-	if(right_dominant == 1):
-		print("- more active hand is: Right \n")
+	
+	print("* * * {} * * *".format(title))
 
-	else:
-		print("- more active hand is: Left hand \n")
-		hand='L'
 
 	###
 	#
 	# change origin point to be between the hip's markers // True is to find the relative coordinates
 	#
 	###
-
-	new_origin = ['RFWT', 'LFWT', 'RBWT']
+	new_origin = ['RFWT', 'LFWT', 'RBWT', 'LBWT']
 	new_data = t.change_origin_point(data, new_origin, marker_list, True)
 	
+	###
+	#
+	## checks for dominant hand
+	#
+	##
+	right_dominant = t.dominant_hand(start_frame, end_frame, data, marker_list)
+	hand='R'
+	if(right_dominant == 1):
+		print("- more active hand is: Right \n")
+	else:
+		print("- more active hand is: Left hand \n")
+		hand='L'
+
+
 	###
 	# compute velocity based on original trajectory 
 	# returns - 3 chanel (x,y,z) velocity and normilized velocity
@@ -117,7 +124,6 @@ if __name__ == "__main__":
 	# analysis of each sign beased on refined raw segmentation 
 	# 
 	###	
-	print(title)
 	for sign in enumerate(signs2):
 		st = sign[1][0]+start_frame
 		en = sign[1][1]+start_frame

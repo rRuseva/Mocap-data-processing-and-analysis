@@ -12,10 +12,10 @@ import tools as t
 if __name__ == "__main__":
 	dictionary_path = ''
 	
-	# filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-	# title = 'Pocasi_01'
-	# start_frame = 600
-	# end_frame = 7445
+	filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
+	title = 'Pocasi_01'
+	start_frame = 600
+	end_frame = 7445
 
 	# start_frame = 1000
 	# end_frame = 1710
@@ -51,6 +51,8 @@ if __name__ == "__main__":
 	
 	r_velocity, r_vel = t.hand_velocity(start_frame, end_frame, new_data, marker_list, 'R')
 	median = np.median(r_vel)
+	average = np.average(r_vel)
+	mode= stats.mode(r_vel)
 
 	r_acc = t.hand_acceleration(r_vel)
 	r_acc_filt = t.butter_filter(r_acc, 12, fps, 10)
@@ -91,9 +93,12 @@ if __name__ == "__main__":
 	# startandend after 1st segm
 	# plt.plot(x[signs[:, 0]], r_vel[signs[:, 0]], 'rs', label = "Start 1")	
 	# plt.plot(x[signs[:, 1]], r_vel[signs[:, 1]], 'r*', label = "End 1")	
-	plt.axhline(y=median, color='r', linestyle='-', label="Treshold")
+	plt.axhline(y=median, color='r', linestyle='-', label="Treshold - median")
+	# plt.axhline(y=average, color='g', linestyle='-', label="Treshold - average")	
+	# plt.axhline(y=mode[0], color='b', linestyle='-', label="Treshold - mode")
 	# startandend after 2nd segm
-	# plt.plot(x[signs2[:, 0]], r_vel[signs2[:, 0]], 'ms', label = "Start 2")	
+	# plt.plot(x[signs2[:, 0]], r_vel[signs2[:, 0]], 'ms', label = "Start 2")
+
 	# plt.plot(x[signs2[:, 1]], r_vel[signs2[:, 1]], 'm*', label = "End 2")
 	# plt.axhline(y=tr, color='m', linestyle='-', label="Refined Treshold ")	
 
@@ -110,7 +115,7 @@ if __name__ == "__main__":
 	fig2 = plt.figure("{}-signs-acc".format(title), figsize=(10.5,7))
 	fig2.suptitle("Right hand acceleration for sign between {} and {} frame".format(start_frame, end_frame))	
 
-	plt.plot(x, r_acc, 'c', label=' acceleration') 
+	# plt.plot(x, r_acc, 'c', label=' acceleration') 
 	plt.plot(x, r_acc_filt, 'm', label='Filtered acceleration') 
 	plt.plot(x[zero_crossing], r_acc_filt[zero_crossing], 'o')
 	# plt.plot(x[signs[:, 0]], r_acc_filt[signs[:, 0]], 'rs', label = "Start")	

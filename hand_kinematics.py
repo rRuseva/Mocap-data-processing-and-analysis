@@ -16,6 +16,9 @@ if __name__ == "__main__":
 	start_frame = 600
 	end_frame = 7445
 
+	start_frame = 1000
+	end_frame = 3000
+
 	# start_frame = 1000
 	# end_frame = 1710 
 
@@ -62,22 +65,26 @@ if __name__ == "__main__":
 
 	x = np.arange(start_frame, end_frame)
 	
-	fig = plt.figure("{}-kinematics-{}-{}".format(title, start_frame, end_frame), figsize=(10.5,7))
-	fig.suptitle("Right hand kinematics for sign between {} and {} frame".format(start_frame, end_frame))	
+	# fig = plt.figure("{}-kinematics-{}-{}".format(title, start_frame, end_frame), figsize=(10.5,7))
+	# fig.suptitle("Right hand kinematics for sign between {} and {} frame".format(start_frame, end_frame))	
 
-	plt.subplot(3, 1, 1)
+	# plt.subplot(3, 1, 1)
+	fig1 = plt.figure("{}-hand-trajectory-{}-{}".format(title, start_frame, end_frame), figsize=(10.5,7))
 	plt.plot(x,r_hand_tr[:,[0]], 'r', label='x') 
 	plt.plot(x,r_hand_tr[:,[1]], 'g', label='y') 
 	plt.plot(x,r_hand_tr[:,[2]], 'b', label='z')
 	plt.ylabel("Trajectory (mm)") 
+	plt.xlabel("Frames")
 	plt.grid(True)
 
-	plt.subplot(3, 1, 2)
-	plt.plot(x,r_velocity[:,[0]], 'r') 
-	plt.plot(x,r_velocity[:,[1]], 'g') 
-	plt.plot(x,r_velocity[:,[2]], 'b')
-	plt.plot(x, r_vel, 'm', label='Normilized velocity') 
-	plt.plot(x[zero_crossing], r_vel[zero_crossing], 'o', label= "Extremums")
+	# plt.subplot(3, 1, 2)
+	fig2 = plt.figure("{}-hand-velocity-{}-{}".format(title, start_frame, end_frame), figsize=(10.5,7))
+	plt.plot(x,r_velocity[:,[0]], 'r', label='x') 
+	plt.plot(x,r_velocity[:,[1]], 'g', label='y') 
+	plt.plot(x,r_velocity[:,[2]], 'b', label='z')
+	# plt.plot(x, r_vel, 'm', label='Normilized velocity') 
+	# plt.plot(x[zero_crossing], r_vel[zero_crossing], 'o', label= "Extremums")
+	
 	# plt.plot(x[extremums], r_vel[extremums], 'o')
 	# plt.plot(x[signs[:, 0]], r_vel[signs[:, 0]], 'rs', label = "Start")	
 	# plt.plot(x[signs[:,1]], r_vel[signs[:,1]], 'r^', label = "End")	
@@ -85,14 +92,19 @@ if __name__ == "__main__":
 	plt.xlabel("Frames")
 	plt.grid(True)
 
-	plt.subplot(3, 1, 3)
+	legend = fig2.legend(loc='upper right')
+
+	# plt.subplot(3, 1, 3)
+	fig3 = plt.figure("{}-hand-acceleration-{}-{}".format(title, start_frame, end_frame), figsize=(10.5,7))
 	plt.plot(x,r_acc, 'c', label="Acceleration")
 	plt.plot(x,r_acc_filt, 'm', label='Filtered acceleration')
-	plt.plot(x[zero_crossing],r_acc_filt[zero_crossing], 'o')
-	plt.ylabel("Acceleration over orig (mm/frame^2)")
+	# plt.plot(x[zero_crossing],r_acc_filt[zero_crossing], 'o')
+	plt.ylabel("Acceleration (mm/frame^2)")
 	plt.xlabel("Frames")
 	plt.grid(True)
 
-	legend = fig.legend(loc='upper right')
+	legend = fig1.legend(loc='upper right')
+	legend = fig2.legend(loc='upper right')
+	legend = fig3.legend(loc='upper right')
 
 	plt.show()

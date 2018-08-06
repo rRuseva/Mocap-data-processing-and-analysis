@@ -13,14 +13,6 @@ from scipy.signal import argrelextrema
 import scipy.signal as signal
 
 
-#  
-def marker_list_read(filename):
-	m_list = []
-	with open(filename, 'r') as w:
-		for line in w:
-			m_list.append(line.split('\n')[0])
-
-	return m_list
 
 # returns the index of a given marker from given marker list
 def marker_index(mlist, mname):
@@ -60,28 +52,14 @@ def read_frames(filename):
 			for marker in range(tot_markers):
 				# frame_index, marker_index, x,y,z,_,_
 				data[frame, marker, :] = point[1][marker]/10	#point[0] is frame number
-				#print(point[1][marker])
 			data[frame, tot_markers,:] = np.zeros(5)
-		#print(data[1:6, 0:1, 0:3])
 		
-		# print(reader.point_labels)
 		makrer_list = []
 		for marker in enumerate(reader.point_labels):
 			makrer_list.append(marker[1].strip())
 			#print(marker)
 		makrer_list.append("ORIGIN")
 		tot_markers = tot_markers+1
-
-		# print(makrer_list)
-
-		# # print(data[1:2, :, :])
-		
-		# print(marker_name(mlist,62))
-
-		# print(marker_name(makrer_list,0))
-		# print(marker_name(makrer_list,tot_markers-1))
-		# m = marker_index(makrer_list, 'ORIGIN')
-		# print(data[1, m, 0:3])
 
 	return data[:, :, 0:3], makrer_list, fps
 
@@ -122,8 +100,10 @@ def hand_marker(data, mlist, h='R'):
 	IHAND = data[:, IHAND_indx,:]
 	IWR = data[:, IWR_indx,:]
 	OWR = data[:, OWR_indx, :]
-	# print(OHAND, IHAND, IWR, OWR)
+
 	hand = np.average([OHAND,IHAND,IWR,OWR], axis=0)
+	# hand =(OHAND + IHAND + IWR + OWR )/4.0
+
 	return hand
 
 # returns 4numpy arrays for left and right hand and arm displacment
@@ -147,6 +127,7 @@ def hand_displacment(start_frame, end_frame, data, mlist):
 	LWRE_indx = marker_index(mlist, 'LWRE')
 
 	diff_right_hand = np.zeros([tot_frames, 3])
+	# leght of right hand trajectory // = total distance 
 	diff_right_hand_sum = 0	
 	diff_RWRE = np.zeros([tot_frames, 3])
 	diff_RWRE_sum = 0
@@ -170,6 +151,7 @@ def hand_displacment(start_frame, end_frame, data, mlist):
 		diff_LWRE[frame] = abs(temp_data[frame, LWRE_indx, :] - temp_data[frame-1, LWRE_indx, :])
 		diff_LWRE_sum = diff_LWRE_sum + diff_LWRE[frame]
 
+	#avarage based on segment lenght
 	diff_right_hand_sum = diff_right_hand_sum/tot_frames
 	diff_left_hand_sum = diff_left_hand_sum/tot_frames
 	diff_RWRE_sum = diff_RWRE_sum/tot_frames
@@ -177,43 +159,42 @@ def hand_displacment(start_frame, end_frame, data, mlist):
 	
 	# threshold
 	differ = ((diff_right_hand_sum + diff_left_hand_sum + diff_RWRE_sum + diff_LWRE_sum)/4)*9/10
-	# print(differ)
-	# print()
-	# print("R h:{} a:{}".format(diff_right_hand_sum, diff_RWRE_sum))
-	# print("L h:{} a:{}".format(diff_left_hand_sum, diff_LWRE_sum))
-
-	# WHY ABS - do tests 
+	
+	# check if hand displacment is more than a threshold and thus desides if it is one or two handed sign
 	if((abs(diff_right_hand_sum) > differ).any() or (abs(diff_RWRE_sum) > differ).any()):
 		is_right_handed = True
 	if((abs(diff_left_hand_sum) > differ).any() or (abs(diff_LWRE_sum) > differ).any()):
 		is_left_handed = True
-	
 
+
+	one_hand = 0 
+	if(is_left_handed  and is_right_handed ):
+		# two handed sign
+		one_hand = 3
+	elif(is_right_handed ):
+		# right handed sign
+		one_hand = 1
+		right_dominant = 1
+	elif(is_left_handed == 1):
+		# left handed sign
+		one_hand = 2
+		right_dominant = 0
+	else:
+		# no hands or error
+		one_hand = 0
+
+	# checks if the right hand is more active than the left hand
 	if((diff_right_hand_sum > diff_left_hand_sum).any() or (diff_RWRE_sum > diff_LWRE_sum).any()):
 		right_dominant = 1
 	else:
 		right_dominant = 0
 
-
-	one_hand = 0 
-	if(is_left_handed and is_right_handed):
-		# two handed sign
-		one_hand = 3
-	elif(is_right_handed):
-		# right handed sign
-		one_hand = 1
-	elif(is_left_handed):
-		# left handed sign
-		one_hand = 2
-	else:
-		# no hands or error
-		one_hand = 0
-
-	return diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, right_dominant, one_hand
+	return diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, is_right_handed, one_hand
 
 # return 1 if RIGHT hand is the dominant hand 
 def dominant_hand(start_frame, end_frame, data, mlist):
 	diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, right_dominant, one_hand = hand_displacment(start_frame, end_frame, data, mlist)
+	
 	return right_dominant
 
 # return number from 0 to 3 if the sign is:
