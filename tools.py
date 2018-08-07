@@ -126,6 +126,7 @@ def hand_displacment(start_frame, end_frame, data, mlist):
 	RWRE_indx = marker_index(mlist, 'RWRE')			
 	LWRE_indx = marker_index(mlist, 'LWRE')
 
+	# right hand displacment
 	diff_right_hand = np.zeros([tot_frames, 3])
 	# leght of right hand trajectory // = total distance 
 	diff_right_hand_sum = 0	
@@ -686,6 +687,7 @@ def plot_velocity(start_frame, end_frame, vel, acc, signs, threshold):
 	plt.show()
 
 	#not finished
+
 def wrist_orientation_frame(frame, data, mlist, h='R'):
 	if(h == 'L'):
 		LOWR = data[frame, marker_index(mlist, 'LOWR'), :]

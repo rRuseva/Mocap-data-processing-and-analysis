@@ -18,10 +18,10 @@ if __name__ == "__main__":
 	#
 	###
 
-	# filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-	# title = 'Pocasi_01'
-	# start_frame = 600
-	# end_frame = 7445
+	filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
+	title = 'Pocasi_01'
+	start_frame = 600
+	end_frame = 7445
 
 	# start_frame = 1000
 	# end_frame = 1710
@@ -41,10 +41,10 @@ if __name__ == "__main__":
 	# start_frame = 743
 	# end_frame = 6680
 
-	filename = os.path.join(dictionary_path, 'projevy_pocasi_04_ob_rh_lh_b_g_face_gaps.c3d')
-	title = 'Pocasi_04'
-	start_frame = 600
-	end_frame = 5115
+	# filename = os.path.join(dictionary_path, 'projevy_pocasi_04_ob_rh_lh_b_g_face_gaps.c3d')
+	# title = 'Pocasi_04'
+	# start_frame = 600
+	# end_frame = 5115
 
 	data, marker_list, fps = t.read_frames(filename)
 	
@@ -182,17 +182,19 @@ if __name__ == "__main__":
 			r_loc, ch_c_r = t.hand_location(start1+st, end1+st, new_data, marker_list, 'R') 
 			l_loc, ch_c_l = t.hand_location(start1+st, end1+st, new_data, marker_list, 'L') 
 			regions_r, count_r = np.unique(r_loc[:,[1]], return_counts = True)
+			print("- Right hand changes in location: {}".format(ch_c_r))
 			print("- Right hand is in:")
 			# print(ch_c_r)
 			# print(len(regions_r))
 			for i in range(0, len(regions_r)):
-				print("- region {} for {} frames ".format(regions_r[i], count_r[i]))
+				print("  - region {} for {} frames ".format(regions_r[i], count_r[i]))
 			regions_l, count_l = np.unique(l_loc[:,[1]], return_counts = True)
-			print("\n- Left hand is in:")
+			print("\n- Left hand changes in location: {}".format(ch_c_l))
+			print("- Left hand is in:")
 			# print(ch_c_l)
 			# print(len(regions_l))
 			for j in range(0, len(regions_l)):
-				print("- region {} for {} frames ".format(regions_l[j], count_l[j]))
+				print(" - region {} for {} frames ".format(regions_l[j], count_l[j]))
 		else:
 			loc, ch_c = t.hand_location(start1+st, end1+st, new_data, marker_list, h) 
 			regions, count = np.unique(loc[:,[1]], return_counts = True)
@@ -201,7 +203,7 @@ if __name__ == "__main__":
 				print("- region {} for {} frames ".format(regions[i], count[i]))
 
 	
-		t.plot_hand_location(start1+st, end1+st, new_data, marker_list)
+		# t.plot_hand_location(start1+st, end1+st, new_data, marker_list)
 
 		x = np.arange(st, en)
 
@@ -227,7 +229,7 @@ if __name__ == "__main__":
 		plt.grid(True)
 		legend = fig1.legend(loc='upper right')
 		# t.plot_hand_location(st, en, new_data, marker_list)
-		plt.show()
+	plt.show()
 
 
 	# print(signs[8][0]+start_frame)
