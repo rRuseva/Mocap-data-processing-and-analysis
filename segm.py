@@ -18,10 +18,10 @@ if __name__ == "__main__":
 	#
 	###
 
-	filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-	title = 'Pocasi_01'
-	start_frame = 600
-	end_frame = 7445
+	# filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
+	# title = 'Pocasi_01'
+	# start_frame = 600
+	# end_frame = 7445
 
 	# start_frame = 1000
 	# end_frame = 1710
@@ -41,10 +41,10 @@ if __name__ == "__main__":
 	# start_frame = 743
 	# end_frame = 6680
 
-	# filename = os.path.join(dictionary_path, 'projevy_pocasi_04_ob_rh_lh_b_g_face_gaps.c3d')
-	# title = 'Pocasi_04'
-	# start_frame = 600
-	# end_frame = 5115
+	filename = os.path.join(dictionary_path, 'projevy_pocasi_04_ob_rh_lh_b_g_face_gaps.c3d')
+	title = 'Pocasi_04'
+	start_frame = 600
+	end_frame = 5115
 
 	data, marker_list, fps = t.read_frames(filename)
 	
@@ -81,7 +81,8 @@ if __name__ == "__main__":
 	r_velocity, r_vel = t.hand_velocity(start_frame, end_frame, new_data, marker_list, hand)
 	# compute the median value vor velocity used as threshold for later analysis and segmentation
 	median = np.median(r_vel)
-
+	print("first treshold" )
+	print(median)
 	# compute acceleration based on normilized velocity
 	r_acc = t.hand_acceleration(r_vel)
 	# low pass filter of the acceleration for removing noise coused by recording techology
@@ -94,10 +95,11 @@ if __name__ == "__main__":
 	zero_crossing = t.zero_crossing(r_acc_filt)
 
 	labels = t.segm(r_vel, r_acc_filt, start_frame, end_frame, new_data, marker_list, median)
-	signs, signs1 = t.get_signs_borders(labels, start_frame, end_frame)
+	signs = t.get_signs_borders(labels, start_frame, end_frame)
 
 
 	count = len(signs)
+	print(" count  = ", count)
 	# analyze velocity during rest pose for better defining the threshold used for segmentation 
 	rest_pose_vel = np.zeros([end_frame - start_frame])
 	for i in range(0, count-1):
@@ -109,16 +111,16 @@ if __name__ == "__main__":
 		rest_pose_vel[st:en] = vel_norm
 
 	tr = np.amax(rest_pose_vel)
-	print("threshold = ", tr)
+	print(" new threshold = ", tr)
 
 	# refined starts and ends of the signs 
 	labels2 = t.segm(r_vel, r_acc_filt, start_frame, end_frame, new_data, marker_list, tr)
-	signs2, signs3 = t.get_signs_borders(labels2, start_frame, end_frame)
+	signs2 = t.get_signs_borders(labels2, start_frame, end_frame)
 	# signs2, signs3 = t.segment_signs(start_frame, end_frame, new_data,marker_list,fps, tr)
 	count2 = len(signs2)
 
+	print(" count2  = ", count2)
 	
-
 	###
 	#
 	# analysis of each sign beased on refined raw segmentation 
@@ -126,7 +128,7 @@ if __name__ == "__main__":
 	###	
 	for sign in enumerate(signs2):
 		st = sign[1][0]+start_frame
-		en = sign[1][1]+start_frame
+		en = sign[1][1]+start_frame 
 
 		print("*****")
 		print("{}. The sign between {} - {} frames".format(sign[0]+1, st, en))
@@ -137,21 +139,10 @@ if __name__ == "__main__":
 		acc_f = r_acc_filt[st-start_frame:en-start_frame]
 		
 		zeros = t.zero_crossing(acc_f)
-		zeros1 = t.interesting_points(acc_f)
-		# print(zeros)
-		# print(np.shape(zeros))
 
-		# ## not OK
-		# start = zeros[1]
-		# end = zeros[np.shape(zeros)[0]-3]
-		# print('Real start and end')
-		# print("{}-{}".format(start+st, end+st))
-		
-		# print(zeros+start_frame)
 		l = t.segm(vel_norm, acc_f, st-start_frame, en-start_frame, new_data, marker_list, tr)
 		start1, end1 = t.get_real_signs(vel_norm, l, st, en )
-		# print('Real start and end ')
-		# print("{}-{}".format(start1+st, end1+st))
+
 	
 		print()
 		print("Real start and end are {}-{}".format(start1+st, end1+st))

@@ -53,7 +53,7 @@ if __name__ == "__main__":
 	r_acc_filt = t.butter_filter(r_acc, 12, fps, 10)
 	zero_crossing = t.zero_crossing(r_acc_filt)
 	
-	signs, signs1 = t.segment_signs(start_frame, end_frame, new_data,marker_list,fps, median)
+	signs = t.segment_signs(start_frame, end_frame, new_data,marker_list,fps, median)
 	count = len(signs)
 
 	print(count)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 	tr = np.amax(rest_pose_vel)
 	print("threshold=", tr)
-	signs2, signs3 = t.segment_signs(start_frame, end_frame, new_data,marker_list,fps, tr)
+	signs2 = t.segment_signs(start_frame, end_frame, new_data,marker_list,fps, tr)
 	count2 = len(signs2)
 
 	x = np.arange(start_frame, end_frame)
@@ -116,8 +116,8 @@ if __name__ == "__main__":
 	plt.plot(x[signs2[:, 0]], r_vel[signs2[:, 0]], 'bs', label = "Start 2 ( end RP)" )	
 	plt.plot(x[signs2[:, 1]], r_vel[signs2[:, 1]], 'b*', label = "End 2 (Start RP")	
 
-	plt.plot(x[signs3[:, 0]], r_vel[signs3[:, 0]], 'ms', label = "Start 2")	
-	plt.plot(x[signs3[:, 1]], r_vel[signs3[:, 1]], 'm*', label = "End 2")
+	# plt.plot(x[signs3[:, 0]], r_vel[signs3[:, 0]], 'ms', label = "Start 2")	
+	# plt.plot(x[signs3[:, 1]], r_vel[signs3[:, 1]], 'm*', label = "End 2")
 
 	plt.axhline(y=median, color='r', linestyle='-', label="Treshold")
 

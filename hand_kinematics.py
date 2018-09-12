@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	plt.plot(x,r_velocity[:,[1]], 'g', label='y') 
 	plt.plot(x,r_velocity[:,[2]], 'b', label='z')
 	# plt.plot(x, r_vel, 'm', label='Normilized velocity') 
-	# plt.plot(x[zero_crossing], r_vel[zero_crossing], 'o', label= "Extremums")
+	plt.plot(x[zero_crossing], r_vel[zero_crossing], 'o', label= "Extremums")
 	
 	# plt.plot(x[extremums], r_vel[extremums], 'o')
 	# plt.plot(x[signs[:, 0]], r_vel[signs[:, 0]], 'rs', label = "Start")	

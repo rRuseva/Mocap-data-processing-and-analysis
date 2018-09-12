@@ -487,13 +487,10 @@ def find_extremums(data):
 # creates an array (labels) 3d of frames with flags for start and end
 # labels[frame][0/1][-1/0/1]
 # 2nd axis is 0 if the velocity is under the threshold
-# 3rd  axis is flag for start (1), end (0), nothing (-1)
 def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
+	# finds velocity extrema's
 	vel_ex = zero_crossing(acc)
 	n = len(vel_ex)
-	# threshold = np.median(vel) # 0.15
-
-
 	labels = np.full([n,3], -100)
 	for i in range(n):
 		if(vel[vel_ex[i]] <= threshold):
@@ -502,11 +499,12 @@ def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
 		else: 
 			labels[i][0] = vel_ex[i]
 			labels[i][1] = 1
-
+	# print(labels)
 	i=1
 	while(i <n-2):
 		if(labels[i][1]-labels[i+1][1] < 0):
 			# mark start markers
+			# if there is 01 preceed by zero and hand position is near rest poseit is marked with 1
 			if(labels[i-1][1] == 0 ):
 				if(is_rest_pose(labels[i][0]+start_frame, data, mlist) == 1 ):
 					labels[i][2] = 1
@@ -514,13 +512,11 @@ def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
 					labels[i][2] = -1
 			else:
 				labels[i][2] = -1
-		# elif(is_rest_pose(labels[i+1][0]+start_frame, data, mlist) == 1 ):
 		elif(labels[i][1]-labels[i+1][1] > 0): 
-			# print("-- - probably end")
 			# mark end markers
+			# if there is sequence like 10 followed by 0 and the hand position is near rest pose it is marked with 0
 			if(labels[i+2][1] == 0):
 				if(is_rest_pose(labels[i+1][0]+start_frame, data, mlist) == 1 ):
-				# print("---- - probably end")
 					labels[i][2] = -1
 					labels[i+1][2] = 0
 					i = i+1
@@ -528,31 +524,26 @@ def segm(vel, acc, start_frame, end_frame, data, mlist, threshold):
 				labels[i][2] = -1
 		else:
 			labels[i][2] = -1
-		
-		# print(labels[i][0]+start_frame, labels[i][1:])
 		i = i+1
 	return labels 
 
 # loops through array of labels
-# returns two arrays 
-# 	- 1st with frames for start (where the rest pose is left) and end (where the rest pose is entered)
-#	- 2nd with frames for potential start and end for the actual sign 
+# returns array 
+# 	- with frames for start (where the rest pose is left) and end (where the rest pose is entered)
 def get_signs_borders(labels, start_frame, end_frame):
 	start=0
 	end=0
-	#labels[i][0,1,2]
-	# n frames  - good extremum - start 1/end 0 /not important -1
+	#labels[i][0/1/2]
+	#0- n frames //1 - good/bad extremum // 2- start 1/end 0 /not important -1
 	i = 0 
 	count = 0 
 	signs = []
 	n = len(labels)
-	signs2 = []
 
 	while(i < n - 1):
 		if(labels[i][2] == 1 ):
 			start = i
 			i = i + 1
-			s = i + 1
 			while(i < n - 1):
 				if(labels[i][2] == 0 ):
 					break
@@ -561,19 +552,14 @@ def get_signs_borders(labels, start_frame, end_frame):
 					break
 				i = i +1
 			end = i
-			e = i - 2
-			# print(labels[end][0]+start_frame)
 			count = count + 1
 			signs.append((labels[start][0], labels[end][0]))
-			signs2.append((labels[s][0], labels[e][0]))
-			print("sign #{}: {}     -     {} ". format(count,labels[start][0]+start_frame, labels[end][0]+start_frame))
-			print("sign #{}:     {} - {} ". format(count,labels[s][0]+start_frame, labels[e][0]+start_frame))
-			print()
+			print("sign #{}: {}  -  {} ". format(count,labels[start][0]+start_frame, labels[end][0]+start_frame))
+			
 		i = i +1
 
 	signs = np.array(signs)
-	signs2 = np.array(signs2)
-	return signs, signs2
+	return signs
 
 # compute everything needed for segmenting the data
 # returns 2d array 
@@ -590,10 +576,10 @@ def segment_signs(start_frame, end_frame, data, mlist, fps, threshold):
 	acc = butter_filter(acc_norm, 12, fps, 10)
 
 	labels = segm(vel_norm, acc, start_frame, end_frame, data, mlist, threshold)
-	signs, s1 = get_signs_borders(labels, start_frame, end_frame)
+	signs = get_signs_borders(labels, start_frame, end_frame)
 
 	# print(signs.shape)
-	return signs, s1
+	return signs
 
 def get_real_signs(vel, labels, start_frame, end_frame):
 	n = len(labels)
