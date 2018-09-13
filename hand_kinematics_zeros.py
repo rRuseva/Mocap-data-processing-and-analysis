@@ -1,11 +1,9 @@
 import os
 import sys
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import stats
 sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
-# import mocap_tools
 
 import tools as t
 
@@ -39,15 +37,26 @@ if __name__ == "__main__":
     start_frame = 600
     end_frame = 5115
 
-    data, marker_list, fps = t.read_frames(filename)
+    data, marker_list, fps, tot_frames = t.read_frames(filename)
 
     # change origin point to be between the hip's markers // True is to find the relative coordinates
     new_origin = ['RFWT', 'LFWT', 'RBWT']
     new_data = t.change_origin_point(data, new_origin, marker_list, True)
 
-    # r_hand_tr, r_arm_tr = t.hand_trajectory(start_frame, end_frame, new_data, marker_list, 'R')
+    ###
+    #
+    # checks for dominant hand
+    #
+    ##
+    right_dominant = t.dominant_hand(start_frame, end_frame, data, marker_list)
+    hand = 'R'
+    if(right_dominant == 1):
+        print("- more active hand is: Right \n")
+    else:
+        print("- more active hand is: Left hand \n")
+        hand = 'L'
 
-    r_velocity, r_vel = t.hand_velocity(start_frame, end_frame, new_data, marker_list, 'R')
+    r_velocity, r_vel = t.hand_velocity(start_frame, end_frame, new_data, marker_list, hand)
     median = np.median(r_vel)
     average = np.average(r_vel)
     mode = stats.mode(r_vel)
@@ -55,27 +64,6 @@ if __name__ == "__main__":
     r_acc = t.hand_acceleration(r_vel)
     r_acc_filt = t.butter_filter(r_acc, 12, fps, 10)
     zero_crossing = t.zero_crossing(r_acc_filt)
-
-    # labels = t.segm(r_vel, r_acc_filt, start_frame, end_frame, new_data, marker_list, median)
-    # signs, s1 = t.get_signs_borders(labels, start_frame, end_frame)
-    # count = len(signs)
-
-    # # analyze velocity during rest pose for better defining the threshold used for segmentation
-    # rest_pose_vel = np.zeros([end_frame - start_frame])
-    # for i in range(0, count-1):
-    # 	st = signs[i][1]
-    # 	en = signs[i+1][0]
-    # 	n = en-st
-
-    # 	vel, vel_norm = t.hand_velocity(st+start_frame,en+start_frame,new_data, marker_list,'R')
-    # 	rest_pose_vel[st:en] = vel_norm
-
-    # tr = np.amax(rest_pose_vel)
-    # print("threshold=", tr)
-
-    # # refined starts and ends of the signs
-    # signs2, signs3 = t.segment_signs(start_frame, end_frame, new_data,marker_list,fps, tr)
-    # count2 = len(signs2)
 
     x = np.arange(start_frame, end_frame)
 
@@ -86,23 +74,11 @@ if __name__ == "__main__":
 
     plt.plot(x, r_vel, 'c', label='Normilized velocity')
     plt.plot(x[zero_crossing], r_vel[zero_crossing], 'o')
-    # startandend after 1st segm
-    # plt.plot(x[signs[:, 0]], r_vel[signs[:, 0]], 'rs', label = "Start 1")
-    # plt.plot(x[signs[:, 1]], r_vel[signs[:, 1]], 'r*', label = "End 1")
 
-    # plt.axhline(y=median, color='r', linestyle='-', label="Treshold - median")
+    plt.axhline(y=median, color='r', linestyle='-', label="Treshold - median")
 
-    # plt.axhline(y=average, color='g', linestyle='-', label="Treshold - average")
-    # plt.axhline(y=mode[0], color='b', linestyle='-', label="Treshold - mode")
-    # startandend after 2nd segm
-    # plt.plot(x[signs2[:, 0]], r_vel[signs2[:, 0]], 'ms', label = "Start 2")
-
-    # plt.plot(x[signs2[:, 1]], r_vel[signs2[:, 1]], 'm*', label = "End 2")
-    # plt.axhline(y=tr, color='m', linestyle='-', label="Refined Treshold ")
-
-    # real start and end
-    # plt.plot(x[s1[:, 0]], r_vel[s1[:, 0]], 'gs', label = "Start")
-    # plt.plot(x[s1[:, 1]], r_vel[s1[:, 1]], 'g*', label = "End")
+    plt.axhline(y=average, color='g', linestyle='-', label="Treshold - average")
+    plt.axhline(y=mode[0], color='b', linestyle='-', label="Treshold - mode")
 
     plt.ylabel("Velocity (mm/frame)")
     plt.xlabel("Frames")
@@ -114,11 +90,8 @@ if __name__ == "__main__":
     plt.axhline(y=0, color='r', linestyle='-')
     plt.plot(x, r_acc_filt, 'm', label='Filtered acceleration')
     plt.plot(x[zero_crossing], r_acc_filt[zero_crossing], 'o')
-    # plt.plot(x[signs[:, 0]], r_acc_filt[signs[:, 0]], 'rs', label = "Start")
-    # plt.plot(x[signs[:,1]], r_acc_filt[signs[:,1]], 'r^', label = "End")
     plt.ylabel("Acceleration (mm/frame^2)")
     plt.xlabel("Frames")
     plt.grid(True)
 
-    # plt.hist(r_vel, bins='auto')
     plt.show()

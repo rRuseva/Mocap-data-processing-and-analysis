@@ -32,7 +32,6 @@ def read_frames(filename):
     with open(filename, 'rb') as _handle:
         reader = c3d.Reader(_handle)
         tot_frames = reader.last_frame() - reader.first_frame() + 1
-        print("first-last frame {} - {}".format(reader.first_frame(), reader.last_frame()))
         tot_markers = reader.point_used
         fps = int(reader.header.frame_rate)
 
@@ -57,7 +56,7 @@ def read_frames(filename):
         makrer_list.append("ORIGIN")
         tot_markers = tot_markers + 1
 
-    return data[:, :, 0:3], makrer_list, fps
+    return data[:, :, 0:3], makrer_list, fps, tot_frames
 
 
 # change the origin point of a 'data' set to an absolute coordinates with center new_origin[]
@@ -126,7 +125,7 @@ def hand_displacment(start_frame, end_frame, data, mlist):
 
     # right hand displacment
     diff_right_hand = np.zeros([tot_frames, 3])
-    # leght of right hand trajectory // = total distance
+    # lenght of right hand trajectory // = total distance
     diff_right_hand_sum = 0
     diff_RWRE = np.zeros([tot_frames, 3])
     diff_RWRE_sum = 0
@@ -158,7 +157,7 @@ def hand_displacment(start_frame, end_frame, data, mlist):
     # threshold
     differ = ((diff_right_hand_sum + diff_left_hand_sum + diff_RWRE_sum + diff_LWRE_sum) / 4) * 9 / 10
 
-    # check if hand displacment is more than a threshold and thus desides if it is one or two handed sign
+    # check if hand displacment is more than a threshold and thus decides if it is one or two handed sign
     if((abs(diff_right_hand_sum) > differ).any() or (abs(diff_RWRE_sum) > differ).any()):
         is_right_handed = True
     if((abs(diff_left_hand_sum) > differ).any() or (abs(diff_LWRE_sum) > differ).any()):
@@ -198,7 +197,7 @@ def dominant_hand(start_frame, end_frame, data, mlist):
 
 # return number from 0 to 3 if the sign is:
 # with no hands - only left hand - only right hand - both hands
-def is_on_handed(start_frame, end_frame, data, mlist):
+def is_one_handed(start_frame, end_frame, data, mlist):
     diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, right_dominant, one_hand = hand_displacment(start_frame, end_frame, data, mlist)
 
     return one_hand
@@ -299,7 +298,7 @@ def hand_location_in_frame(frame, data, mlist, h='R'):
     LFWT = data[frame, marker_index(mlist, 'LFWT'), :]
 
     vicinity_v = abs((RFSH[2] - RFWT[2])) * 0.1		# by vertical
-    vicinity = abs((RFSH[0] - LFSH[0])) * 0.1		# by horizontal
+    vicinity = (abs(RFSH[0]) + abs(LFSH[0])) * 0.2		# by horizontal
 
     if(mid_hand[2] >= ARIEL[2] - vicinity_v):												# if above head
         if(mid_hand[0] < RFSH[0] - vicinity or mid_hand[0] < RFWT[0] - vicinity):
@@ -356,6 +355,7 @@ def hand_location(start_frame, end_frame, data, mlist, h='R'):
     return hand_locations, change_counter
 
 
+# plots the graphic of hand movement through the the plane regions
 def plot_hand_location(start_frame, end_frame, data, mlist):
     r_loc, c1 = hand_location(start_frame, end_frame, data, mlist, h='R')
     l_loc, c2 = hand_location(start_frame, end_frame, data, mlist, h='L')
@@ -371,19 +371,20 @@ def plot_hand_location(start_frame, end_frame, data, mlist):
     plt.plot(x, l_loc[:, [1]], 'g', label='Left hand')
     if(len(rp) > 0):
         plt.plot(x[rp], r_loc[:, [1]][rp], 'bo', label='Rest pose')
+        plt.plot(x[rp], l_loc[:, [1]][rp], 'bo')
     plt.grid(True)
     plt.xlabel("Frames")
     plt.ylabel("Regions")
 
     plt.subplot(2, 2, 3)
-    plt.title("R-hand location changes: {}".format(c1))
+    plt.title("Right hand location changes: {}".format(c1))
     plt.hist(r_loc[:, [1]], bins=range(15), facecolor='r', align="left")
     plt.xticks(np.arange(1, 16, step=1))
     plt.ylabel("Number of Frames")
     plt.xlabel("Regions")
 
     plt.subplot(2, 2, 4)
-    plt.title("L-hand location changes: {}".format(c2))
+    plt.title("Left hand location changes: {}".format(c2))
     plt.hist(l_loc[:, [1]], bins=range(15), facecolor='g', align="left")
     plt.xticks(np.arange(1, 16, step=1))
     plt.ylabel("Number of Frames")
@@ -419,6 +420,28 @@ def hand_acceleration(velocity):
         acc[frame] = velocity[frame + 1] - velocity[frame]
 
     return acc
+
+# plots the graphic of hand velocity and acceleration
+
+
+def plot_velocity(start_frame, end_frame, vel, acc, signs, threshold):
+    x = np.arange(start_frame, end_frame)
+
+    fig1 = plt.figure("{}-{}-velocity".format(start_frame, end_frame), figsize=(10.5, 7))
+    fig1.suptitle("Right hand velocity for sign between {} and {} frame".format(start_frame, end_frame))
+
+    plt.plot(x, vel, 'c', label='Normilized velocity')
+    plt.plot(x[zero_crossing], vel[zero_crossing], 'o')
+    plt.plot(x[signs[:, 0]], vel[signs[:, 0]], 'rs', label="Start")
+    plt.plot(x[signs[:, 1]], vel[signs[:, 1]], 'r*', label="End")
+
+    plt.axhline(y=threshold, color='r', linestyle='-', label="Treshold")
+    plt.ylabel("Velocity (mm/frame)")
+    plt.xlabel("Frames")
+    plt.grid(True)
+    legend = fig1.legend(loc='upper right')
+
+    plt.show()
 
 
 # coefficients for Buterworth filter
@@ -554,9 +577,7 @@ def get_real_signs(vel, labels, start_frame, end_frame):
     n = len(labels)
     start = start_frame
     end = end_frame
-    ###
-    # maybe i should check also for vel[start_frame and end_frame]
-    ###
+
     for i in range(1, n - 1):
         if(vel[labels[i - 1][0]] < vel[labels[i][0]] and vel[labels[i][0]] > vel[labels[i + 1][0]]):
             labels[i][2] = 0		# max
@@ -597,26 +618,6 @@ def get_segmented_data(start_frame, end_frame, data, mlist, fps, order=0):
     s_d = np.delete(s_d, np.s_[n_sum:], 0)
 
     return s_d
-
-
-def plot_velocity(start_frame, end_frame, vel, acc, signs, threshold):
-    x = np.arange(start_frame, end_frame)
-
-    fig1 = plt.figure("{}-{}-velocity".format(start_frame, end_frame), figsize=(10.5, 7))
-    fig1.suptitle("Right hand velocity for sign between {} and {} frame".format(start_frame, end_frame))
-
-    plt.plot(x, vel, 'c', label='Normilized velocity')
-    plt.plot(x[zero_crossing], vel[zero_crossing], 'o')
-    plt.plot(x[signs[:, 0]], vel[signs[:, 0]], 'rs', label="Start")
-    plt.plot(x[signs[:, 1]], vel[signs[:, 1]], 'r*', label="End")
-
-    plt.axhline(y=threshold, color='r', linestyle='-', label="Treshold")
-    plt.ylabel("Velocity (mm/frame)")
-    plt.xlabel("Frames")
-    plt.grid(True)
-    legend = fig1.legend(loc='upper right')
-
-    plt.show()
 
 
 # not finished
