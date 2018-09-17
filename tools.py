@@ -346,19 +346,26 @@ def hand_location(start_frame, end_frame, data, mlist, h='R'):
     temp_data = data[start_frame:end_frame + 1, :, :]
     hand_locations = np.zeros([tot_frames, 2], dtype=int)
     change_counter = 0
+    hand_loc_un = []
+    time = 1
 
     for frame in range(0, tot_frames, 1):
         hand_locations[frame] = (frame + start_frame, hand_location_in_frame(frame, temp_data, mlist, h))
-        if(hand_locations[frame][1] != hand_locations[frame - 1][1]):
-            change_counter = change_counter + 1
-
-    return hand_locations, change_counter
+        if(frame > 0):
+            if(hand_locations[frame][1] == hand_locations[frame - 1][1]):
+                time = time + 1
+            else:
+                change_counter = change_counter + 1
+                hand_loc_un.append((hand_locations[frame - 1][1], time))
+                time = 1
+    hand_loc_un.append((hand_locations[tot_frames - 1][1], time))
+    return hand_locations, change_counter, hand_loc_un
 
 
 # plots the graphic of hand movement through the the plane regions
 def plot_hand_location(start_frame, end_frame, data, mlist):
-    r_loc, c1 = hand_location(start_frame, end_frame, data, mlist, h='R')
-    l_loc, c2 = hand_location(start_frame, end_frame, data, mlist, h='L')
+    r_loc, c1, r_loc_un = hand_location(start_frame, end_frame, data, mlist, h='R')
+    l_loc, c2, l_loc_un = hand_location(start_frame, end_frame, data, mlist, h='L')
     rp = rest_pose(start_frame, end_frame, data, mlist)
 
     x = np.arange(start_frame, end_frame)
@@ -403,7 +410,7 @@ def hand_velocity(start_frame, end_frame, data, mlist, h='R'):
 
     hand = hand_marker(temp_data, mlist, h)
 
-    for frame in range(0, tot_frames, 1):
+    for frame in range(0, tot_frames - 1, 1):
         velocity[frame] = hand[frame + 1, :] - hand[frame, :]
 
     vel_norm = np.linalg.norm(velocity, axis=1)
@@ -581,15 +588,17 @@ def get_real_signs(vel, labels, start_frame, end_frame):
     for i in range(1, n - 1):
         if(vel[labels[i - 1][0]] < vel[labels[i][0]] and vel[labels[i][0]] > vel[labels[i + 1][0]]):
             labels[i][2] = 0		# max
-        if(vel[labels[i - 1][0]] > vel[labels[i][0]] and vel[labels[i][0]] < vel[labels[i + 1][0]]):
+        elif(vel[labels[i - 1][0]] > vel[labels[i][0]] and vel[labels[i][0]] < vel[labels[i + 1][0]]):
             labels[i][2] = 1		# min
+        else:
+            labels[i][2] = -1
 
     for i in range(1, n - 1):
-        if(labels[i][2] == 1):
+        if(labels[i][2] == 1 or labels[i][2] == -1):
             start = labels[i][0]
             break
     for i in range(n - 1, 1, -1):
-        if(labels[i][2] == 1):
+        if(labels[i][2] == 1 or labels[i][2] == -1):
             end = labels[i][0]
             break
 
