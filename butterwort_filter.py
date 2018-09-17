@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import stats
-sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
+sys.path.insert(0, "D:\Radi\MyProjects\MOCAP")
 # import mocap_tools
 
 import tools as t
@@ -12,10 +12,10 @@ import tools as t
 if __name__ == "__main__":
     dictionary_path = ''
 
-    filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-    title = 'Pocasi_01'
-    start_frame = 600
-    end_frame = 7445
+    # filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
+    # title = 'Pocasi_01'
+    # start_frame = 600
+    # end_frame = 7445
 
     # filename = os.path.join(dictionary_path, 'projevy_pocasi_02_ob_rh_lh_b_g_face_gaps.c3d')
     # title = 'Pocasi_02'
@@ -35,6 +35,9 @@ if __name__ == "__main__":
     title = 'Pocasi_04'
     start_frame = 600
     end_frame = 5115
+
+    start_frame = 1
+    end_frame = 5368
 
     data, marker_list, fps, tot_frames = t.read_frames(filename)
 
@@ -56,19 +59,19 @@ if __name__ == "__main__":
     x = np.arange(start_frame, end_frame)
 
     fig2 = plt.figure("{}-hand_acc".format(title), figsize=(10.5, 7))
-    # fig2.suptitle("Right hand acceleration for sign between {} and {} frame".format(start_frame, end_frame))
+
     fig2.suptitle("Hand acceleration")
     plt.plot(x, r_acc, 'c', label='Acceleration ')
 
-    plt.plot(x, r_acc_filt2, 'y', label='Filtered acceleration / coff = 2 ')
+    # plt.plot(x, r_acc_filt2, 'y', label='Filtered acceleration / coff = 2 ')
 
-    plt.plot(x, r_acc_filt4, 'g', label='Filtered acceleration / coff = 4 ')
+    # plt.plot(x, r_acc_filt4, 'g', label='Filtered acceleration / coff = 4 ')
 
-    plt.plot(x, r_acc_filt10, 'b', label='Filtered acceleration / coff = 10 ')
+    # plt.plot(x, r_acc_filt10, 'b', label='Filtered acceleration / coff = 10 ')
 
     plt.plot(x, r_acc_filt, 'm', label='Filtered acceleration / coff = {}'.format(cutoff))
 
-    # plt.plot(x[zero_crossing], r_acc_filt[zero_crossing], 'o')
+    plt.plot(x[zero_crossing], r_acc_filt[zero_crossing], 'o')
     plt.ylabel("Acceleration (mm/frame^2)")
     plt.xlabel("Frames")
     plt.grid(True)

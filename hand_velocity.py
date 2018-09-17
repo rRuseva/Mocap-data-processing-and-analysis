@@ -1,10 +1,9 @@
 import os
 import sys
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import stats
-sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
+sys.path.insert(0, "D:\Radi\MyProjects\MOCAP")
 # import mocap_tools
 
 import tools as t

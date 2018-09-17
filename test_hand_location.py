@@ -2,7 +2,8 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
+import itertools as it
+sys.path.insert(0, "D:\Radi\MyProjects\MOCAP")
 
 import tools as t
 
@@ -16,11 +17,8 @@ if __name__ == "__main__":
 
     filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
     title = 'Pocasi_01'
-    # start_frame = 600
-    # end_frame = 7445
-
-    start_frame = 782
-    end_frame = 887
+    start_frame = 600
+    end_frame = 7445
 
     # filename = os.path.join(dictionary_path, 'projevy_pocasi_02_ob_rh_lh_b_g_face_gaps.c3d')
     # title = 'Pocasi_02'
@@ -53,16 +51,23 @@ if __name__ == "__main__":
     new_origin = ['RFWT', 'LFWT', 'RBWT', 'LBWT']
     new_data = t.change_origin_point(data, new_origin, marker_list, True)
 
-    one_hand = t.is_one_handed(start_frame, end_frame, new_data, marker_list)
+    start_frame = 1144
+    end_frame = 1186
 
-    message = "The sign between {} - {} frames is".format(start_frame, end_frame)
-    if(one_hand == 3):
-        message = message + ' two handed'
-    elif(one_hand == 1):
-        message = message + ' right handed'
-    elif(one_hand == 2):
-        message = message + " left handed"
-    else:
-        message = message + " with no hands"
+    r_loc, ch_c_r, reg_r = t.hand_location(start_frame, end_frame, new_data, marker_list, 'R')
+    l_loc, ch_c_l, reg_l = t.hand_location(start_frame, end_frame, new_data, marker_list, 'L')
 
-    print(message)
+    print("- Right hand changes in location: {}".format(ch_c_r))
+    print("- Right hand is in:")
+
+    for reg in reg_r:
+        print("  - region {} for {} frames ".format(reg[0], reg[1]))
+
+    regions_l, count_l = np.unique(l_loc[:, [1]], return_counts=True)
+    print("\n- Left hand changes in location: {}".format(ch_c_l))
+    print("- Left hand is in:")
+    for reg in reg_l:
+        print("  - region {} for {} frames ".format(reg[0], reg[1]))
+
+    t.plot_hand_location(start_frame, end_frame, new_data, marker_list)
+    # plt.show()

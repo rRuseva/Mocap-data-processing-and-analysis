@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
-sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
+sys.path.insert(0, "D:\Radi\MyProjects\MOCAP")
 
 import tools as t
 
@@ -86,7 +86,6 @@ if __name__ == "__main__":
     legend = fig1.legend(loc='upper right')
 
     plt.subplot(2, 1, 2)
-    # plt.plot(x, r_acc, 'c', label=' acceleration')
     plt.axhline(y=0, color='r', linestyle='-')
     plt.plot(x, r_acc_filt, 'm', label='Filtered acceleration')
     plt.plot(x[zero_crossing], r_acc_filt[zero_crossing], 'o')

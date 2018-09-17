@@ -42,32 +42,30 @@ if __name__ == "__main__":
     new_origin = ['RFWT', 'LFWT', 'RBWT']
     new_data = t.change_origin_point(data, new_origin, marker_list, True)
 
-    r_loc, c1 = t.hand_location(start_frame, end_frame, data, marker_list, h='R')
-    l_loc, c2 = t.hand_location(start_frame, end_frame, data, marker_list, h='L')
-    rp = t.rest_pose(start_frame, end_frame, data, marker_list)
+    r_loc, c1, r_reg_un = t.hand_location(start_frame, end_frame, data, marker_list, h='R')
+    l_loc, c2, l_reg_un = t.hand_location(start_frame, end_frame, data, marker_list, h='L')
 
     x = np.arange(start_frame, end_frame)
 
     fig = plt.figure("{}-HandsLocation-{}-{}".format(title, start_frame, end_frame), figsize=(10.5, 7))
     fig.suptitle("Hands location for sign between {} and {} frame".format(start_frame, end_frame))
 
-    # plt.subplot(2, 1, 1)
+    plt.subplot(2, 1, 1)
     plt.plot(x, r_loc[:, [1]], 'r', label='Right hand')
     plt.plot(x, l_loc[:, [1]], 'g', label='Left hand')
-    plt.plot(x[rp], r_loc[:, [1]][rp], 'bo', label='Rest pose')
     plt.grid(True)
     plt.xlabel("Frames")
     plt.ylabel("Regions")
 
     plt.subplot(2, 2, 3)
-    plt.title("R-hand location changes: {}".format(c1))
+    plt.title("Right hand location changes: {}".format(c1))
     plt.hist(r_loc[:, [1]], bins=range(15), facecolor='r', align="left")
     plt.xticks(np.arange(1, 16, step=1))
     plt.ylabel("Number of Frames")
     plt.xlabel("Regions")
 
     plt.subplot(2, 2, 4)
-    plt.title("L-hand location changes: {}".format(c2))
+    plt.title("Left hand location changes: {}".format(c2))
     plt.hist(l_loc[:, [1]], bins=range(15), facecolor='g', align="left")
     plt.xticks(np.arange(1, 16, step=1))
     plt.ylabel("Number of Frames")
