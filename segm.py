@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools as it
 sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
 
 import tools as t
@@ -14,10 +15,10 @@ if __name__ == "__main__":
     #
     ###
 
-    filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-    title = 'Pocasi_01'
-    start_frame = 600
-    end_frame = 7445
+    # filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
+    # title = 'Pocasi_01'
+    # start_frame = 600
+    # end_frame = 7445
 
     # start_frame = 1000
     # end_frame = 1710
@@ -31,10 +32,10 @@ if __name__ == "__main__":
     # start_frame = 2500
     # end_frame = 3500
 
-    # filename = os.path.join(dictionary_path, 'projevy_pocasi_03_ob_rh_lh_b_g_face_gaps.c3d')
-    # title = 'Pocasi_03'
-    # start_frame = 743
-    # end_frame = 6680
+    filename = os.path.join(dictionary_path, 'projevy_pocasi_03_ob_rh_lh_b_g_face_gaps.c3d')
+    title = 'Pocasi_03'
+    start_frame = 743
+    end_frame = 6680
 
     # filename = os.path.join(dictionary_path, 'projevy_pocasi_04_ob_rh_lh_b_g_face_gaps.c3d')
     # title = 'Pocasi_04'
@@ -44,6 +45,8 @@ if __name__ == "__main__":
     data, marker_list, fps, total_frames = t.read_frames(filename)
 
     print("\n* * * {} * * *".format(title))
+    print("Total lenght of the recording: {}".format(total_frames))
+    print("Frame rate is: {}".format(fps))
 
     ###
     #
@@ -122,20 +125,26 @@ if __name__ == "__main__":
         start = sign[1][0] + start_frame
         end = sign[1][1] + start_frame
 
-        print("\n*****\n")
+        print("\n\n*****")
         print("{}. The sign between {} - {} frame".format(sign[0] + 1, start, end))
 
         vel_norm = r_vel[start - start_frame:end - start_frame]
         acc = r_acc[start - start_frame:end - start_frame]
         acc_f = r_acc_filt[start - start_frame:end - start_frame]
+        avg_vel = np.average(vel_norm)
+        avg_acc = np.average(acc_f)
 
         zeros = t.zero_crossing(acc_f)
 
         l = t.segm(vel_norm, acc_f, start - start_frame, end - start_frame, new_data, marker_list, tr)
         real_start, real_end = t.get_real_signs(vel_norm, l, start, end)
+        sign_lenght = real_end - real_start
 
         print()
         print("Real start and end are {}-{}".format(real_start + start, real_end + start))
+        # print("Length of the sign (in frames): {}".format(sign_lenght))
+        # print("Avegare velocity: {}".format(avg_vel))
+        # print("Average acceleration: {}".format(avg_acc))
 
         diff_right_hand, diff_left_hand, diff_RWRE, diff_LWRE, right_dominant, one_hand = t.hand_displacment(real_start + start, real_end + start, new_data, marker_list)
 
@@ -159,28 +168,23 @@ if __name__ == "__main__":
             print("- dominant hand is: Left hand \n")
 
         if(one_hand == 3):
-            r_loc, ch_c_r = t.hand_location(real_start + start, real_end + start, new_data, marker_list, 'R')
-            l_loc, ch_c_l = t.hand_location(real_start + start, real_end + start, new_data, marker_list, 'L')
-            regions_r, count_r = np.unique(r_loc[:, [1]], return_counts=True)
+            r_loc, ch_c_r, reg_u_r = t.hand_location(real_start + start, real_end + start, new_data, marker_list, 'R')
+            l_loc, ch_c_l, reg_u_l = t.hand_location(real_start + start, real_end + start, new_data, marker_list, 'L')
             print("- Right hand changes in location: {}".format(ch_c_r))
             print("- Right hand is in:")
-            for i in range(0, len(regions_r)):
-                print("  - region {} for {} frames ".format(regions_r[i], count_r[i]))
+            for reg in reg_u_r:
+                print("  - region {} for {} frames ".format(reg[0], reg[1]))
 
-            regions_l, count_l = np.unique(l_loc[:, [1]], return_counts=True)
             print("\n- Left hand changes in location: {}".format(ch_c_l))
             print("- Left hand is in:")
-            for j in range(0, len(regions_l)):
-                print(" - region {} for {} frames ".format(regions_l[j], count_l[j]))
-
+            for reg in reg_u_l:
+                print("  - region {} for {} frames ".format(reg[0], reg[1]))
         else:
-            loc, ch_c = t.hand_location(real_start + start, real_end + start, new_data, marker_list, h)
-            regions, count = np.unique(loc[:, [1]], return_counts=True)
-            print("- Dominant hand is in \n")
-            for i in range(0, len(regions)):
-                print("- region {} for {} frames ".format(regions[i], count[i]))
+            loc, ch_c, reg_u = t.hand_location(real_start + start, real_end + start, new_data, marker_list, h)
 
-        # t.plot_hand_location(real_start + start, real_end + start, new_data, marker_list)
+            print("- Dominant hand is in \n")
+            for reg in reg_u:
+                print("  - region {} for {} frames ".format(reg[0], reg[1]))
 
         x = np.arange(start, end)
 
@@ -200,4 +204,4 @@ if __name__ == "__main__":
         plt.grid(True)
         legend = fig1.legend(loc='upper right')
         t.plot_hand_location(real_start + start, real_end + start, new_data, marker_list)
-    plt.show()
+        plt.show()
