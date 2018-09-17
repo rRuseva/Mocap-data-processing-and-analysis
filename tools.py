@@ -345,7 +345,7 @@ def hand_location(start_frame, end_frame, data, mlist, h='R'):
     tot_frames = end_frame - start_frame
     temp_data = data[start_frame:end_frame + 1, :, :]
     hand_locations = np.zeros([tot_frames, 2], dtype=int)
-    change_counter = 0
+    change_counter = 1
     hand_loc_un = []
     time = 1
 
