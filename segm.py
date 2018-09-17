@@ -182,7 +182,7 @@ if __name__ == "__main__":
         else:
             loc, ch_c, reg_u = t.hand_location(real_start + start, real_end + start, new_data, marker_list, h)
 
-            print("- Dominant hand is in \n")
+            print("- Dominant hand is in:")
             for reg in reg_u:
                 print("  - region {} for {} frames ".format(reg[0], reg[1]))
 
