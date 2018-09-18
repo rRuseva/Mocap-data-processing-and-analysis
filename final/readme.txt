@@ -9,3 +9,7 @@ hand_kinematics_zeros 	- shows graphs of hand velocity and acceleration and zero
 rest_pose_analysis.py 	- plots the graphic of hand acceleration durring rest-pose after raw segmentation
 butterwort_filter.py 	- shows the results after applying Butterwort filter over hand acceleration
 hand_location.py 		- shows the result of hand location method
+
+all .c3d files are test input files 
+- - - Requirments
+	- python enviornment
