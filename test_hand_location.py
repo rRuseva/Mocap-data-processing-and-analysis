@@ -1,73 +1,64 @@
-import os
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools as it
-sys.path.insert(0, "D:\Radi\MyProjects\MOCAP")
-
+import argparse
 import tools as t
+import read_input as ri
+
 
 if __name__ == "__main__":
-    dictionary_path = ''
-    ###
-    #
     # load whole take file with start/end frame without T-poses
-    #
-    ###
+    parser = argparse.ArgumentParser()
+    parser.add_argument(dest='fname', type=int)
+    parser.add_argument(dest='start_frame', type=int)
+    parser.add_argument(dest='end_frame', type=int)
+    args = parser.parse_args()
+    fname = args.fname
+    # fname = 3
 
-    filename = os.path.join(dictionary_path, 'projevy_pocasi_01_ob_rh_lh_b_g_face_gaps.c3d')
-    title = 'Pocasi_01'
-    start_frame = 600
-    end_frame = 7445
+    title, start_frame, end_frame, data, marker_list, fps, total_frames, hand = ri.read_input(fname)
+    start_frame = args.start_frame
+    end_frame = args.end_frame
+    # start_frame = 5285
+    # end_frame = 5529
 
-    # filename = os.path.join(dictionary_path, 'projevy_pocasi_02_ob_rh_lh_b_g_face_gaps.c3d')
-    # title = 'Pocasi_02'
-    # start_frame = 608
-    # end_frame = 6667
-
-    # #end_frame = 1200
-    # start_frame = 2500
-    # end_frame = 3500
-
-    # filename = os.path.join(dictionary_path, 'projevy_pocasi_03_ob_rh_lh_b_g_face_gaps.c3d')
-    # title = 'Pocasi_03'
-    # start_frame = 743
-    # end_frame = 6680
-
-    # filename = os.path.join(dictionary_path, 'projevy_pocasi_04_ob_rh_lh_b_g_face_gaps.c3d')
-    # title = 'Pocasi_04'
-    # start_frame = 600
-    # end_frame = 5115
-
-    data, marker_list, fps, total_frames = t.read_frames(filename)
-
-    print("\n* * * {} * * *".format(title))
-
-    ###
-    #
-    # change origin point to be between the hip's markers // True is to find the relative coordinates
-    #
-    ###
-    new_origin = ['RFWT', 'LFWT', 'RBWT', 'LBWT']
-    new_data = t.change_origin_point(data, new_origin, marker_list, True)
-
-    start_frame = 1144
-    end_frame = 1186
-
-    r_loc, ch_c_r, reg_r = t.hand_location(start_frame, end_frame, new_data, marker_list, 'R')
-    l_loc, ch_c_l, reg_l = t.hand_location(start_frame, end_frame, new_data, marker_list, 'L')
+    r_loc, ch_c_r, r_reg_un = t.hand_location(start_frame, end_frame, data, marker_list, h='R')
+    l_loc, ch_c_l, l_reg_un = t.hand_location(start_frame, end_frame, data, marker_list, h='L')
 
     print("- Right hand changes in location: {}".format(ch_c_r))
     print("- Right hand is in:")
-
-    for reg in reg_r:
+    for reg in r_reg_un:
         print("  - region {} for {} frames ".format(reg[0], reg[1]))
 
-    regions_l, count_l = np.unique(l_loc[:, [1]], return_counts=True)
     print("\n- Left hand changes in location: {}".format(ch_c_l))
     print("- Left hand is in:")
-    for reg in reg_l:
+    for reg in l_reg_un:
         print("  - region {} for {} frames ".format(reg[0], reg[1]))
 
-    t.plot_hand_location(start_frame, end_frame, new_data, marker_list)
-    # plt.show()
+    x = np.arange(start_frame, end_frame)
+
+    fig = plt.figure("{}-HandsLocation-{}-{}".format(title, start_frame, end_frame), figsize=(10.5, 7))
+    fig.suptitle("Hands location for sign between {} and {} frame".format(start_frame, end_frame))
+
+    plt.subplot(2, 1, 1)
+    plt.plot(x, r_loc[:, [1]], 'r', label='Right hand')
+    plt.plot(x, l_loc[:, [1]], 'g', label='Left hand')
+    plt.grid(True)
+    plt.xlabel("Frames")
+    plt.ylabel("Regions")
+
+    plt.subplot(2, 2, 3)
+    plt.title("Right hand location changes: {}".format(ch_c_r))
+    plt.hist(r_loc[:, [1]], bins=range(15), facecolor='r', align="left")
+    plt.xticks(np.arange(1, 16, step=1))
+    plt.ylabel("Number of Frames")
+    plt.xlabel("Regions")
+
+    plt.subplot(2, 2, 4)
+    plt.title("Left hand location changes: {}".format(ch_c_l))
+    plt.hist(l_loc[:, [1]], bins=range(15), facecolor='g', align="left")
+    plt.xticks(np.arange(1, 16, step=1))
+    plt.ylabel("Number of Frames")
+    plt.xlabel("Regions")
+
+    legend = fig.legend(loc='upper right')
+    plt.show()

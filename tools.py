@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import c3d
-sys.path.insert(0, "D:\Radi\Radi RU\4ti kurs\2sm-WBU\MOCAP\Python\mocap")
 import vector_math as vm
 from scipy.signal import argrelextrema
 import scipy.signal as signal
+sys.path.insert(0, "D:\Radi\MyProjects\MOCAP\files")
 
 
 # returns the index of a given marker from given marker list
@@ -38,10 +38,6 @@ def read_frames(filename):
         # units = reader.get_string('POINT.UNITS')
         # print(units)
         # origin = reader.get('FORCE_PLATFORM.ORIGIN')
-        # print(origin.float_array)
-
-        # print(fps)
-        # print(tot_markers)
 
         data = np.zeros((tot_frames, tot_markers + 1, 5))
         for frame, (point) in enumerate(reader.read_frames()):
@@ -580,6 +576,8 @@ def segment_signs(start_frame, end_frame, data, mlist, fps, threshold):
     return signs
 
 
+# loops through array of labels
+# returns start and end tag
 def get_real_signs(vel, labels, start_frame, end_frame):
     n = len(labels)
     start = start_frame
@@ -605,28 +603,21 @@ def get_real_signs(vel, labels, start_frame, end_frame):
     return start, end
 
 
-# returns a new array with data containing only signs// without rest pose
-def get_segmented_data(start_frame, end_frame, data, mlist, fps, order=0):
-    signs_boundaries, s1 = segment_signs(start_frame, end_frame, data, mlist, fps)
-    if(order == 1):
-        signs_boundaries = s1
-    count = len(signs_boundaries)
-    s_d = np.zeros((int(data.shape[0]), int(data.shape[1]), int(data.shape[2])))
+# analyze velocity during rest pose for better defining the threshold used for segmentation
+def rest_pose_analyzis(signs, start_frame, end_frame, data, mlist, h):
+    rest_pose_vel = np.zeros([end_frame - start_frame])
+    count = len(signs)
+    for i in range(0, count - 1):
+        st = signs[i][1]
+        en = signs[i + 1][0]
 
-    j = 0
-    n_sum = 0
-    for i in range(0, count):
-        st = signs_boundaries[i][0] + start_frame
-        end = signs_boundaries[i][1] + start_frame
-        n = end - st
-        n_sum = n_sum + n
+        vel, vel_norm = hand_velocity(st + start_frame, en + start_frame, data, mlist, h)
+        rest_pose_vel[st:en] = vel_norm
 
-        s_d[j:j + n, :, :] = data[st:end, :, :]
-        j = j + n
+    threshold = np.amax(rest_pose_vel)
+    # print(" Refined threshold is {}", tr)
 
-    s_d = np.delete(s_d, np.s_[n_sum:], 0)
-
-    return s_d
+    return threshold
 
 
 # not finished
