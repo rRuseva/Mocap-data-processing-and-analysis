@@ -1,4 +1,5 @@
 *** READ ME ***
+Tool for MoCap data processing and analysis for sign language database. This tool performs precise segmentation of input dictionary files for sign language database. Analyzing the motion of hand gestures. Provides description of the hand gestures according Hamburg notation system for sign language.
 
 main.py 	- contain main workflow of the program
 tools.py 	- consist all needed methodsfor analyzing the data
